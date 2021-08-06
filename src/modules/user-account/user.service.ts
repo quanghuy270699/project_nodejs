@@ -13,6 +13,7 @@ import { Configuration } from '../../config/config.keys';
 import { ConfigService } from 'src/config/config.service';
 import { EkycService } from './ekyc.service';
 import { UserProfile } from './user.profile.entity';
+import { UpdateProfileDto } from './dto/user.dto';
 
 
 const FormData = require("form-data")
@@ -69,7 +70,7 @@ export class UserService {
     return user;
   }
 
-  async updateprofile(user_id:string, body: UserProfileDto): Promise<any> {
+  async updateprofile(user_id:string, body: UpdateProfileDto): Promise<any> {
     try{
       const user: User = await this._userRepository.findOne(user_id);
       if (!user) {
@@ -93,7 +94,6 @@ export class UserService {
     try {
       const filename = user_id + '.jpg'
       const data = await this.uploadS3(file, user_id, filename);
-      
       await this._userProfileRepository.update(user_id, {image_profile_url: data.Location})
       return {
         StatusCode: 200, 
@@ -106,20 +106,16 @@ export class UserService {
     }
   }
 
-  async ekycphoto(file:any, upload_type: string, user_id: string, cccd_type: string): Promise<any> {
+  async ekycphoto(file:any, upload_type: string, user_id: string): Promise<any> {
       
       const userProfile: UserProfile = await this._userProfileRepository.findOne({ where: { id: user_id}});
       const filetype = '.jpg'
-      // const filename = user_id + filetype
-      const imagename = user_id + '_' + upload_type + filetype;
+      const imagename = user_id + '_' + upload_type +  "_" + file.originalname;
       const Stream = createWriteStream(join('src/assets',`/${imagename}`)).write(file.buffer);
-      // const Stream = file.createReadStream().pipe(createWriteStream(join('src/assets',`/${imagename}`)));
 
-      // console.log('=================upload_type==================', upload_type)
       
       try {
-        // const imagename = user_id + '_' + upload_type;
-        // const readStream = file.createReadStream()
+
         const data = await this.uploadS3(file, user_id, imagename);
         if ("selfie" === upload_type){
           const type = "5";
@@ -137,13 +133,10 @@ export class UserService {
         else if ("front_id_card" === upload_type){
           // console.log('------cccd------', userProfile.cccd)
 
-          if (cccd_type === 'true'){
-            var type = "2";
 
-          }
-          else{
-            var type = "0";
-          }
+  
+          var type = "0";
+     
           const token = await this._ekycService.ApiGetTokenAi()
           var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
           await this._userProfileRepository.update(user_id, {image_cccd_front_url: data.Location});
@@ -155,12 +148,9 @@ export class UserService {
         }
     
         else if ("back_id_card" === upload_type){
-          if (cccd_type === 'true'){
-            var type = "3";
-          }
-          else{
-            var type = "1";
-          }
+
+          var type = "1";
+          
           const token = await this._ekycService.ApiGetTokenAi()
           var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
           await this._userProfileRepository.update(user_id, {image_cccd_back_url: data.Location});
@@ -183,5 +173,54 @@ export class UserService {
         const userProfile: UserProfile = await this._userProfileRepository.findOne({ where: { id: user_id}});
         return await this._ekycService.ApiEKYC(token, user_id, userProfile, this._userProfileRepository)
 
+  }
+
+  async getdata(user_id:string): Promise<any> {
+    try{
+      const user: User = await this._userRepository.findOne(user_id);
+      if (!user) {
+        throw new HttpException(VndErrorType.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);;
+      }
+
+
+      if (user.Profile.ekyc === true){
+        return { 
+          StatusCode: 200, 
+          Message: 'Success',
+          Data: {"user_id":user_id,
+                "ekyc": user.Profile.ekyc,
+                "full_name": user.Profile.full_name,
+                "birthday": user.Profile.birthday,
+                "address": user.Profile.address,
+                "hometown": user.Profile.hometown,
+                "cccd": user.Profile.cccd,
+                "cccd_date": user.Profile.cccd_date,
+                "cccd_location": user.Profile.cccd_location,
+                "phone_number": user.username,
+                "image_face_url": user.Profile.image_profile_url
+  
+              }
+        };
+
+      }
+      else{
+        return { 
+          StatusCode: 200, 
+          Message: 'Success',
+          Data: {"user_id":user_id,
+                "ekyc": user.Profile.ekyc,
+                "full_name": user.Profile.full_name,
+                "phone_number": user.username,
+  
+              }
+        };
+      }
+
+      
+ 
+    }
+    catch{
+      throw new HttpException(VndErrorType.FAIL_TO_GET_DATA, HttpStatus.BAD_REQUEST);
+    }
   }
 }

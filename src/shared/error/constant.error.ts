@@ -16,6 +16,7 @@ export const VndErrorType = {
       Message: "Username or password incorrect." 
     }
   },
+  
   USER_CONFLICT: {
     Message: 'error',
     Data:{
@@ -28,6 +29,21 @@ export const VndErrorType = {
     Data:{
       ErrorCode: "USER_NOT_FOUND",
       Message: "Username not found." 
+    }
+  },
+  USER_NOT_IN_SYSTEM: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "USER_NOT_IN_SYSTEM",
+      Message: "face not match with cccd." 
+    }
+  },
+
+  FAIL_TO_GET_DATA: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "FAIL_TO_GET_DATA",
+      Message: "fail to get data." 
     }
   },
 
@@ -145,15 +161,43 @@ export const VndErrorType = {
     Message: 'error',
     Data:{
       ErrorCode: "USER_UPLOAD_FAIL",
-      Message: "Username upload  image fail." 
+      Message: "upload file fail." 
     }
   },
-
   REQUEST_TO_AI_FAIL: {
     Message: 'error',
     Data:{
       ErrorCode: "REQUEST_TO_AI_FAIL",
-      Message: "request to ai fail." 
+      Message: "request data from AI fail." 
+    }
+  },
+
+  FAIL_CREATE_CV: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "FAIL_CREATE_CV",
+      Message: "fail to create cv." 
+    }
+  },
+  FAIL_UPDATE_CV: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "FAIL_UPDATE_CV",
+      Message: "fail to update cv." 
+    }
+  },
+  FAIL_DELETE_CV: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "FAIL_DELETE_CV",
+      Message: "fail to delete cv." 
+    }
+  },
+  CV_NOT_FOUND: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "CV_NOT_FOUND",
+      Message: "Not found cv." 
     }
   },
 }

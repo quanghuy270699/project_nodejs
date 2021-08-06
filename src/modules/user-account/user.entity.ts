@@ -1,5 +1,7 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, OneToOne, UpdateDateColumn, CreateDateColumn, PrimaryColumn } from 'typeorm';
 import { UserProfile } from './user.profile.entity';
+import { JobCareer } from '../cv-job/job.career.entity';
+import { JobCompany } from '../recruitment/job.company.entity';
 
 @Entity('app_user_account')
 export class User extends BaseEntity {
@@ -41,4 +43,9 @@ export class User extends BaseEntity {
 
   @OneToOne(type => UserProfile, userPrfile => userPrfile.User, { cascade: true, nullable: false, eager: true })
   Profile: UserProfile;
+
+  @OneToOne(type =>JobCompany, jobCompany => jobCompany.User, { cascade: true, nullable: false, eager: true })
+  jobCompany: JobCompany;
+
+  
 }

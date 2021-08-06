@@ -12,14 +12,14 @@ export class AuthRepository extends Repository<User> {
 
     const user = new User();
     const userprofile = new UserProfile();
-    user.username = userRegisterDto.phonenumber;
+    user.username = userRegisterDto.phone_number;
     userprofile.full_name = userRegisterDto.name;
     userprofile.gender = userRegisterDto.gender;
+    userprofile.ekyc = false
     userprofile.created_at = new Date();
     user.activate = 1;
     user.activated_at = new Date();
     user.created_at = new Date();
-
     const salt = await genSalt(10);
     user.password = await hash(userRegisterDto.password, salt);
 

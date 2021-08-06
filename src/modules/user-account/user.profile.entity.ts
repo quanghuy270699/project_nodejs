@@ -15,6 +15,9 @@ export class UserProfile extends BaseEntity {
   @Column({ type: 'int' })
   gender: number;
 
+  @Column({ type: 'int' })
+  career_id: number;
+
   @Column({ type: 'varchar' })
   cccd: string
 
@@ -25,19 +28,10 @@ export class UserProfile extends BaseEntity {
   cccd_location: string;
 
   @Column({ type: 'varchar' })
-  cccd_registry_office: string;
-
-  @Column({ type: 'varchar' })
   address: string;
 
   @Column({ type: 'varchar' })
   hometown: string;
-
-  @Column({ type: 'int' })
-  address_districtId: number
-
-  @Column({ type: 'int'})
-  address_provinceId: number;
 
   @Column({ type: 'varchar' })
   image_face_url: string;
@@ -71,6 +65,15 @@ export class UserProfile extends BaseEntity {
 
   @UpdateDateColumn({ type: 'int', name: 'deleted' })
   deleted: number;
+
+  @Column("int", { name: "province_id", nullable: true })
+  province_id: number | null;
+
+  @Column("int", { name: "district_id", nullable: true })
+  district_id: number | null;
+
+  @Column("int", { name: "ward_id", nullable: true })
+  ward_id: number | null;
 
 
   @OneToOne(type => User, user => user.Profile, { onDelete: 'CASCADE' })

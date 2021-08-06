@@ -1,7 +1,11 @@
 import { diskStorage } from 'multer'
-import { join, extname } from 'path'
+import { join, extname } from 'path';
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 
 export const multerOptions = {
+    limits: {
+        fileSize: 10485760,
+      },
     storage: diskStorage({
         destination: (req, file, cb) => {
             const dirPath = join(__dirname, '/../temp')

@@ -9,7 +9,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "db": "rm -rf entities & npx typeorm-model-generator -h localhost -d app_cds -p 3306 -u admin -x Vnd@2021 -e mysql -o entities --noConfig true --ce pascal --cp camel",
+    "db": "rm -rf entities & npx typeorm-model-generator -h 14.232.245.210 -d cds_db_app -p 3306 -u root2 -x Abc#123456 -e mysql -o entities --noConfig true -a",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -39,6 +39,8 @@
     "cache-manager": "^3.4.4",
     "aws-sdk": "^2.799.0",
     "cache-manager-redis-store": "^2.0.0",
+    "amqp-connection-manager": "^3.2.0",
+    "amqplib": "^0.5.5",
     "class-transformer": "^0.3.2",
     "class-validator": "^0.12.2",
     "cloudinary": "^1.22.0",

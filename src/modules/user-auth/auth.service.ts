@@ -27,12 +27,12 @@ export class AuthService {
 
   async register(userRegisterDto: UserRegisterDto): Promise<any> {
     const userExists = await this._authRepository.findOne({ where: 
-      { username: userRegisterDto.phonenumber } });
+      { username: userRegisterDto.phone_number } });
     if (userExists) {
       throw new HttpException(VndErrorType.USER_CONFLICT, 402);
     }
     const token = "123456"
-    await this._redisCacheService.set(userRegisterDto.phonenumber, token)
+    await this._redisCacheService.set(userRegisterDto.phone_number, token)
     return { 
       StatusCode: 200, 
       Message: 'Success'
@@ -44,7 +44,7 @@ export class AuthService {
     const user: User = await this._authRepository.findOne({ where: 
       { username: userLoginDto.username } });    
     if (!user) {
-      return VndErrorType.USER_NOT_FOUND;
+      throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
     }
     // Compare user.Password === password
     const isMatch = await compare(userLoginDto.password, user.password);
@@ -56,19 +56,21 @@ export class AuthService {
     const payload: IJwtPayload = {
       id: user.id,
       username: user.username,
+      ekyc: user.Profile.ekyc
     };
     const token = await this._jwtService.sign(payload);
 
     return {
       StatusCode: 200, 
       Message: 'Success',
-      Data: {token:token, user_info: payload}
+      Data: {token:token, 
+            user_info: payload}
     }
   }
 
   async verifyotp(userRegisterDto: UserRegisterDto, otp:string): Promise<any> {
     
-    const cachotp = await this._redisCacheService.get(userRegisterDto.phonenumber);
+    const cachotp = await this._redisCacheService.get(userRegisterDto.phone_number);
     if (cachotp !== otp){
       throw new HttpException(VndErrorType.USER_OTP_NOT_MATCH, 402);
     }
@@ -78,21 +80,21 @@ export class AuthService {
       Message: 'Success',
       Data: {
         "user_id": user_id,
-        "phonenumber": userRegisterDto.phonenumber
+        "phonenumber": userRegisterDto.phone_number
       }
     }
   }
 
 
-  async getotppassword(phonenumber: string): Promise<any | undefined> {
+  async getotppassword(phone_number: string): Promise<any | undefined> {
     const user: User = await this._UserRepository.findOne({ where: 
-                { username: phonenumber } });
+                { username: phone_number } });
     
     if (!user) {
       throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
     }
     const token = "123456" //await this.randomNumber(6);
-    await this._redisCacheService.set(phonenumber, token)
+    await this._redisCacheService.set(phone_number, token)
     return { 
       StatusCode: 200, 
       Message: 'Success'
@@ -131,16 +133,16 @@ export class AuthService {
     if (!isMatch) {
       throw new HttpException(VndErrorType.USER_PASSWORD_NOT_CORRECT, 402);
     }
-      const salt = await genSalt(10);
-      const password = await hash(newpassword, salt);
-      await this._UserRepository.update(user.id, {password: password})
-      return { 
-        StatusCode: 200, 
-        Message: 'Success'
-      }
+
+    const salt = await genSalt(10);
+    const password = await hash(newpassword, salt);
+    await this._UserRepository.update(user.id, {password: password})
+    return { 
+      StatusCode: 200, 
+      Message: 'Success'
+    }
 
   }
-
 
   async randomNumber (length: number) {
     let text: string = "";

@@ -28,7 +28,7 @@ import { UserRepository } from '../user-account/repositories/user.repositry';
         return {
           secret: config.get(Configuration.JWT_SECRET),
           signOptions: {
-            expiresIn: 60*10, // 10 minutes
+            expiresIn: 60*1000, // 10 minutes
           }
         }
       }

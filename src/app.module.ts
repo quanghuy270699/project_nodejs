@@ -6,6 +6,10 @@ import { DatabaseModule } from './database/database.module';
 import { UserModule } from './modules/user-account/user.module';
 import { AuthModule } from './modules/user-auth/auth.module';
 import { RedisCacheModule } from './cache/cache.module';
+import { JobCvModule } from './modules/cv-job/job.cv.module';
+import { RabbitqmModule } from './modules/rabbitmq/producer/producer-mq.module';
+import { RecruitmentModule } from './modules/recruitment/recruitment.module';
+import { LocationModule } from './modules/location/location.module';
 
 @Module({
   imports: [
@@ -13,7 +17,11 @@ import { RedisCacheModule } from './cache/cache.module';
     DatabaseModule,
     RedisCacheModule,  
     UserModule,
-    AuthModule
+    AuthModule,
+    JobCvModule,
+    RabbitqmModule,
+    RecruitmentModule,
+    LocationModule
   ],
   controllers: [],
   providers: [],
