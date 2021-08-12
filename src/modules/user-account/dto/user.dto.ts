@@ -5,9 +5,9 @@ import { ApiProperty } from '@nestjs/swagger';
 export class UserDto {
   @ApiProperty({
     type: String,
-    example: 'selfie',
+    example: '0, 1, 2, 3, 4, 5, 6',
   })
-  upload_type: string;
+  type: string;
 
 
   @ApiProperty({ type: 'file', format: 'binary' })
@@ -27,11 +27,9 @@ export class UserUploadDto {
 
 
 export class UpdateProfileDto {
-  @IsString()
   @ApiProperty({ example: 'Nguyen Van A' })
   full_name: string;
 
-  @IsString()
   @ApiProperty({ example: '12/12/2000' })
   birthday?: string;
 
@@ -42,7 +40,6 @@ export class UpdateProfileDto {
   career_id?: number;
 
 
-  @IsString()
   @ApiProperty({ example: 'email@gmail.com' })
   email?: string;
 

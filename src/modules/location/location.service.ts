@@ -22,7 +22,18 @@ export class LocationService {
     
   }
 
-  async getProvince(): Promise<any> {
+  async getProvince(province_id:number): Promise<any> {
+    const province: MProvince = await this._MProvinceRepository.findOne({where: {province_id: province_id }});
+    console.log('================', province)
+  
+    if (!province) {
+      throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
+    }
+
+      return province
+  }
+
+  async getListProvince(): Promise<any> {
     const province: MProvince[] = await this._MProvinceRepository.find({ order: {"province_name":"ASC"}});
   
     if (!province) {

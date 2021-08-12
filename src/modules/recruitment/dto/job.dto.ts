@@ -31,17 +31,14 @@ export class CreateJobDto {
   @ApiProperty({ example: "1" })
   require_gender: number;
 
-  @ApiProperty({ example: 22 })
-  salary_min: number;
-
   @ApiProperty({ example: 25 })
-  salary_max: number;
+  salary: number;
 
   @ApiProperty({ example: ["Khong yeu cau kinh nghiem"] })
   require_experience: string[];
 
-  @ApiProperty({ example: "5 nam" })
-  require_time: string;
+  @ApiProperty({ example: 1 })
+  require_time: number;
 
 
   @ApiProperty({ example: "03656562565" })

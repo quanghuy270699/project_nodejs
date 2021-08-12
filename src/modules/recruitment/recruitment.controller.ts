@@ -16,7 +16,7 @@ import { ApiBadRequest } from 'src/shared/swagger/error.types';
 import { responseSucess } from 'src/shared/swagger/response.types';
 import { VndErrorType } from 'src/shared/error/constant.error';
 import { CreateProfileDto, UploadDto, 
-  updateProfileCvDto, ProfileCVDto, CreateRecruitmentDto } from './dto/recruitment.dto';
+  updateProfileCvDto, ProfileCVDto, CreateRecruitmentDto, ListJobDto, NewsRecruitmentDto, ListCandidateDto } from './dto/recruitment.dto';
 import { recruitmentService } from './recruitment.service';
 import { multerOptions } from 'src/shared/multer.storage';
 
@@ -31,7 +31,7 @@ import { multerOptions } from 'src/shared/multer.storage';
 
     @Get('/fields-career')
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Get fields career' })
+    @ApiOperation({ summary: 'Get list linh vực hoạt động' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_FIELDS_CAREER)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
     @HttpCode(200)
@@ -42,19 +42,19 @@ import { multerOptions } from 'src/shared/multer.storage';
         return await this._recruitmentService.getfieldsCareer(user.id)
     }
 
-    @Post('/profile-company')
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Create Profile Company' })
-    @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
-    @ApiBadRequest(VndErrorType.FAIL_CREATE_CV)
-    @HttpCode(200)
-    @UsePipes(ValidationPipe)
-    @UseGuards(AuthGuard('jwt'))
-    async getProfileCv(
-      @GetUser() user: User,
-      @Body() body: CreateProfileDto): Promise<any> {
-        return await this._recruitmentService.createProfileCompany(user.id, body)
-    }
+    // @Post('/profile-company')
+    // @ApiBearerAuth('JWT-auth')
+    // @ApiOperation({ summary: 'Create Profile Company' })
+    // @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
+    // @ApiBadRequest(VndErrorType.FAIL_CREATE_CV)
+    // @HttpCode(200)
+    // @UsePipes(ValidationPipe)
+    // @UseGuards(AuthGuard('jwt'))
+    // async getProfileCv(
+    //   @GetUser() user: User,
+    //   @Body() body: CreateProfileDto): Promise<any> {
+    //     return await this._recruitmentService.createProfileCompany(user.id, body)
+    // }
 
     @Post('/upload-photo')
     @ApiBody({description: 'File', type: UploadDto})
@@ -74,58 +74,59 @@ import { multerOptions } from 'src/shared/multer.storage';
         return await this._recruitmentService.uploadphoto(file, user.id, dto.upload_type)
     }
   
-    @Post('/my-profile')
+    @Get('/my-company')
     @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'View Profile Company' })
+    @ApiOperation({ summary: 'View Profile Company for recruitment' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_JOBCOMPANY_DATA)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
-    async updateCV(
+    async myCompany(
       @GetUser() user: User) {
-        return await this._recruitmentService.profileCompany(user.id)
+        return await this._recruitmentService.myCompany(user.id)
     }
 
-    @Get('/list-recruitment')
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Get list recruitment' })
-    @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_CV)
-    @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
-    @HttpCode(200)
-    @UsePipes(ValidationPipe)
-    @UseGuards(AuthGuard('jwt'))
-    async getListRecruitment(
-      @GetUser() user: User): Promise<any> {
-        return await this._recruitmentService.getListNewsRecruitment(user.id)
-    }
-
-    @Post('/create-recruitment')
+    @Post('/company-profile')
     @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'View Profile Company' })
+    @ApiOperation({ summary: 'View Profile Company for candidate' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_JOBCOMPANY_DATA)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
-    async createNewRecruitment(
-      @GetUser() user: User,
-      @Body() body: CreateRecruitmentDto) {
-        return await this._recruitmentService.createNewRecruitment(user.id, body)
+    async companyProfile(
+      @GetUser() user: User) {
+        return await this._recruitmentService.companyProfile(user.id)
     }
+
+
+    // @Post('/list-recruitment')
+    // @ApiBearerAuth('JWT-auth')
+    // @ApiOperation({ summary: 'Get list recruitment' })
+    // @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_RECRUITMENT)
+    // @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
+    // @HttpCode(200)
+    // @UsePipes(ValidationPipe)
+    // @UseGuards(AuthGuard('jwt'))
+    // async getListRecruitment(
+    //   @GetUser() user: User,
+    //   @Body() listjob: ListJobDto): Promise<any> {
+    //     return await this._recruitmentService.getListNewsRecruitment(user.id, listjob.pageIndex, listjob.pageSize)
+    // }
 
     @Post('/news-recruitment')
     @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'View Profile Company' })
+    @ApiOperation({ summary: 'Chi tiết tin tuyển dụng' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_JOBCOMPANY_DATA)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     async NewRecruitment(
       @GetUser() user: User,
-      @Body() body: CreateRecruitmentDto) {
-        return await this._recruitmentService.createNewRecruitment(user.id, body)
+      @Body() body: NewsRecruitmentDto) {
+        return await this._recruitmentService.newsRecruitment(user.id, body.recruitment_id)
     }
   }
   

@@ -1,6 +1,6 @@
-import { IsNotEmpty } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger';
-
+import { Exclude } from 'class-transformer';
 export class avatarUploadDto {
   @ApiProperty({ type: 'string', format: 'binary' })
   file: any;
@@ -22,14 +22,12 @@ export class createCvDto {
   @ApiProperty({ example: 1 })
   gender: number;
 
-
   @ApiProperty({ example: "03656562565" })
   phone_number: string;
 
 
   @ApiProperty({ example: "nguyenvan@gmail.com" })
   email: string;
-
 
   @ApiProperty({ example: "Ha Dong, Ha Tay, Ha Noi" })
   address: string;
@@ -58,8 +56,9 @@ export class createCvDto {
 }
 
 export class updateProfileCvDto {
-  @ApiProperty({ example: "12" })
-  id: string;
+
+  @ApiProperty({ example: 12 })
+  id: number;
 
   @ApiProperty({ example: "Nguyen Van A CV" })
   cv_name: string;
@@ -78,10 +77,8 @@ export class updateProfileCvDto {
   @ApiProperty({ example: "03656562565" })
   phone_number: string;
 
-
   @ApiProperty({ example: "nguyenvan@gmail.com" })
   email: string;
-
 
   @ApiProperty({ example: "Ha Dong, Ha Tay, Ha Noi" })
   address: string;
@@ -98,6 +95,10 @@ export class updateProfileCvDto {
   @ApiProperty({ example: ["Làm việc nhóm", "Excel", "World", "PowerPoint"] })
   skills: string[];
 
+  
+  @ApiProperty({ example:  'kinh doanh'})
+  career_name: string;
+
   @ApiProperty({ example:  1})
   career_id: number;
 
@@ -108,6 +109,14 @@ export class updateProfileCvDto {
 
 export class ProfileCVDto {
   @ApiProperty({ example: 1 })
-  cv_id: string;
+  cv_id: number;
 
+}
+
+export class createSubmitCvDto {
+  @ApiProperty({ example: 2 })
+  job_id: number;
+
+  @ApiProperty({ example: 19 })
+  cv_id: number;
 }

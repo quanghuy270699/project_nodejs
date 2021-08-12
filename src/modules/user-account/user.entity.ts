@@ -1,13 +1,12 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column, OneToOne, UpdateDateColumn, CreateDateColumn, PrimaryColumn } from 'typeorm';
 import { UserProfile } from './user.profile.entity';
-import { JobCareer } from '../cv-job/job.career.entity';
+import { JobCareer } from '../cv/career.job.entity';
 import { JobCompany } from '../recruitment/job.company.entity';
 
 @Entity('app_user_account')
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  @PrimaryColumn({ type: 'bigint', name: 'id'})
-  id: string;
+  @PrimaryGeneratedColumn({ type: "bigint" })
+  id: number;
 
   @Column({ type: 'varchar', name: 'username', unique: true, nullable: false })
   username: string;
@@ -41,10 +40,10 @@ export class User extends BaseEntity {
   platform: string;
 
 
-  @OneToOne(type => UserProfile, userPrfile => userPrfile.User, { cascade: true, nullable: false, eager: true })
+  @OneToOne(type => UserProfile, userPrfile => userPrfile.User, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE' })
   Profile: UserProfile;
 
-  @OneToOne(type =>JobCompany, jobCompany => jobCompany.User, { cascade: true, nullable: false, eager: true })
+  @OneToOne(type =>JobCompany, jobCompany => jobCompany.User, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE' })
   jobCompany: JobCompany;
 
   

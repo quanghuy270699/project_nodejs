@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from 'src/config/config.service';
-import { JobCareerRepository } from '../cv-job/repositories/job.career.repository';
+import { JobCareerRepository } from '../cv/repositories/career.job.repository';
 import { UserProfileRepository } from '../user-account/repositories/user.profile.repository';
 import { UserRepository } from '../user-account/repositories/user.repositry';
 import { recruitmentController } from './recruitment.controller';

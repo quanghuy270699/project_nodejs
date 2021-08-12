@@ -63,15 +63,15 @@ export class CreateProfileDto {
   @ApiProperty({ example:  "1234242313223"})
   tax_id: string;
 
-  @ApiProperty({ example:  "12"})
-  user_id: string;
+  @ApiProperty({ example:  1})
+  user_id: number;
   
 
 }
 
 export class updateProfileCvDto {
-  @ApiProperty({ example: "12" })
-  id: string;
+  @ApiProperty({ example: 12 })
+  id: number;
 
   @ApiProperty({ example: "Nguyen Van A CV" })
   cv_name: string;
@@ -151,11 +151,9 @@ export class CreateRecruitmentDto {
   @ApiProperty({ example: "1" })
   require_gender: number;
 
-  @ApiProperty({ example: 22 })
-  salary_min: number;
 
   @ApiProperty({ example: 25 })
-  salary_max: number;
+  salary: number;
 
   @ApiProperty({ example: ["Khong yeu cau kinh nghiem"] })
   require_experience: string[];
@@ -163,30 +161,72 @@ export class CreateRecruitmentDto {
   @ApiProperty({ example: ["Luong thuong", "nghi tet", "du lich"] })
   employee_benefits: string[];
 
-  @ApiProperty({ example: "5 nam (kinh nghiem 5 nam)" })
-  require_time: string;
+  @ApiProperty({ example: 3 })
+  require_time: number;
 
-  @ApiProperty({ example: "parttime, fulltime" })
-  job_type: string;
+  @ApiProperty({ example: 1 })
+  job_type: number;
 
 
-  @ApiProperty({ example: "20/02/2021 - 24/03/2021" })
+  @ApiProperty({ example: "24/03/2021" })
   expired_date: string;
 
   // @ApiProperty({ example:  1})
   // user_id: number;
 
-  @ApiProperty({ example:  "Vinh Yen"})
-  district_id: string;
+  @ApiProperty({ example:  1})
+  district_id: number;
 
-  @ApiProperty({ example:  "Vinh Phuc"})
-  province_id: string;
+  @ApiProperty({ example:  1})
+  province_id: number;
   
 
 }
 
 export class ProfileCVDto {
   @ApiProperty({ example: 1 })
-  cv_id: string;
+  cv_id: number;
+
+}
+
+
+export class ListJobDto {
+  @ApiProperty({ example: 1 })
+  pageIndex: number;
+
+  @ApiProperty({ example: 5 })
+  pageSize: number;
+
+  @ApiProperty({ example: 1, description:"thời gian: toàn thời gian, bán thời gian",  nullable: true })
+  job_type: number;
+
+  @ApiProperty({ example: 6, nullable: true })
+  time_id: number;
+
+  @ApiProperty({ example: 1, nullable: true })
+  career_id?: number;
+
+  @ApiProperty({ example: 3, nullable: true })
+  salary_id?: number;
+
+  @ApiProperty({ example: 3, nullable: true })
+  province_id?: number;
+
+  @ApiProperty({ example: 3, nullable: true })
+  district_id?: number;
+
+
+
+}
+
+export class NewsRecruitmentDto {
+  @ApiProperty({ example: 1 })
+  recruitment_id: number;
+
+}
+
+export class ListCandidateDto {
+  @ApiProperty({ example: 1 })
+  recruitment_id: number;
 
 }

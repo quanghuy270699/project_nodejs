@@ -26,6 +26,7 @@ export class UserController {
   }
 
   @Get('/user-info')
+  @HttpCode(200)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get basic user info' })
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_USER_INFO_EKYC)
@@ -39,6 +40,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   async getUserInfo(
     @GetUser() user: User): Promise<any> {
+      console.log('================', user.id)
       return await this._userService.getdata(user.id)
   }
 
@@ -75,7 +77,21 @@ export class UserController {
     return await this._userService.updateprofilepic(file, user.id);
   }
 
+  @Get('/qrcode')
+  @ApiOperation({ summary: 'gen qr code' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
+  @ApiBadRequest(VndErrorType.USER_UPLOAD_FAIL)
+  @HttpCode(200)
+  @UsePipes(ValidationPipe)
+  @UseGuards(AuthGuard('jwt'))
+  async genQrCode(
+    @GetUser() user: User){
+    return await this._userService.genQrCode(user.id);
+  }
+
   @Post('/upload/image-ekyc')
+  @HttpCode(200)
   @ApiBearerAuth('JWT-auth')
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_NO_DATA)
   @ApiBadRequest(VndErrorType.USER_UPLOAD_FAIL)
@@ -88,7 +104,7 @@ export class UserController {
     @GetUser() user: User,
     @UploadedFile() file : Express.Multer.File,
     @Body() dto: UserDto) {
-    return await this._userService.ekycphoto(file, dto.upload_type, user.id);
+    return await this._userService.ekycphoto(file, dto.type, user.id);
   }
 
 

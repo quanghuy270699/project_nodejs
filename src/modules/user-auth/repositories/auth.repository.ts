@@ -15,7 +15,9 @@ export class AuthRepository extends Repository<User> {
     user.username = userRegisterDto.phone_number;
     userprofile.full_name = userRegisterDto.name;
     userprofile.gender = userRegisterDto.gender;
-    userprofile.ekyc = false
+    userprofile.ekyc = false;
+    userprofile.has_cv = false;
+    userprofile.is_recruitment = false;
     userprofile.created_at = new Date();
     user.activate = 1;
     user.activated_at = new Date();

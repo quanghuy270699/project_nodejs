@@ -1,10 +1,15 @@
-import { BaseEntity, Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { BaseEntity, Entity, PrimaryColumn, ManyToOne, OneToMany, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { JobCareer } from '../cv/career.job.entity';
+import { MDistrict } from '../location/district.entity';
+import { MProvince } from '../location/province.entity';
+import { MWard } from '../location/ward.entity';
+import { FieldsCareer } from '../recruitment/fields.career.entity';
 import { User } from './user.entity';
 
 @Entity('app_user_profile')
 export class UserProfile extends BaseEntity {
   @PrimaryColumn({ type: 'bigint', name: 'id'})
-  id: string;
+  id: number;
 
   @Column({ type: 'varchar' })
   full_name: string;
@@ -34,6 +39,9 @@ export class UserProfile extends BaseEntity {
   hometown: string;
 
   @Column({ type: 'varchar' })
+  permanent_address: string;
+
+  @Column({ type: 'varchar' })
   image_face_url: string;
 
   @Column({ type: 'varchar' })
@@ -45,14 +53,20 @@ export class UserProfile extends BaseEntity {
   @Column({ type: 'varchar' })
   image_cccd_back_url: string;
 
-  @Column({ type: 'bit' })
+  @Column({ type: 'bool' })
   has_cv: boolean;
 
-  @Column({ type: 'bit' })
+  @Column({ type: 'bool' })
   ekyc: boolean;
+
+  @Column({ type: 'bool' })
+  is_recruitment: boolean;
 
   @Column({ type: 'varchar' })
   email: string;
+
+  @Column({ type: 'varchar' })
+  qrcode_url: string;
 
   @CreateDateColumn({ type: 'date', name: 'email_verified_at' })
   email_verified_at: Date;
@@ -76,7 +90,30 @@ export class UserProfile extends BaseEntity {
   ward_id: number | null;
 
 
+
   @OneToOne(type => User, user => user.Profile, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id' })
   User: User
+
+
+  @OneToOne(type => JobCareer, jobCareer => jobCareer.userProfile, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'career_id', referencedColumnName: 'id'})
+  jobCareer: JobCareer;
+
+  @OneToOne(type => MProvince, mProvince => mProvince.userProfile, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'province_id', referencedColumnName: 'province_id'})
+  mProvince?: MProvince
+
+  @OneToOne(type => MDistrict, mDistrict => mDistrict.userProfile, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'district_id',referencedColumnName: 'district_id' })
+  mDistrict: MDistrict
+
+  @OneToOne(type => MWard, mWard => mWard.userProfile, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'ward_id',referencedColumnName: 'ward_id' })
+  mWard: MWard
+
+
+  // @OneToOne(type => FieldsCareer, fieldsCareer => fieldsCareer.jobCompany, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  // @JoinColumn({ name: 'fields_career', referencedColumnName: 'id'})
+  // FieldsCareer: FieldsCareer;
 }

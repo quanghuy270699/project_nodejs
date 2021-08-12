@@ -1,19 +1,19 @@
-import { BaseEntity, Column, Entity, OneToOne, JoinColumn, PrimaryGeneratedColumn } from "typeorm";
-import { JobCareer } from "../cv-job/job.career.entity";
+import { BaseEntity, Column, Entity, OneToOne, JoinColumn, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
+import { JobCareer } from "../cv/career.job.entity";
 import { User } from "../user-account/user.entity";
 import { FieldsCareer } from "./fields.career.entity";
 import { RecruitmentEntity } from "./recruitment.entity";
 
 @Entity("job_company", { schema: "cds_db_app" })
 export class JobCompany extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: "int", name: "id" })
+  @PrimaryGeneratedColumn({ type: "int"})
   id: number;
 
   @Column("varchar", { name: "company_name", nullable: true, length: 255 })
   company_name: string | null;
 
-  @Column("varchar", { name: "user_id", nullable: true })
-  user_id: string | null;
+  @Column("int", { name: "user_id", nullable: true })
+  user_id: number | null;
 
   @Column("varchar", { name: "cover_url", nullable: true, length: 255 })
   cover_url: string | null;
@@ -64,9 +64,11 @@ export class JobCompany extends BaseEntity {
   @Column("varchar", { name: "tax_id", nullable: true, length: 45 })
   tax_id: string | null;
 
+  @OneToMany(type => RecruitmentEntity, recruitment => recruitment.jobCompany, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id'})
+  Recruitment: RecruitmentEntity
 
-  @OneToOne(type => RecruitmentEntity, recruitmentEntity => recruitmentEntity.JobCompany, { cascade: true, nullable: false, eager: true })
-  RecruitmentEntity: RecruitmentEntity;
+  
 
   @OneToOne(type => FieldsCareer, fieldsCareer => fieldsCareer.jobCompany, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
   @JoinColumn({ name: 'fields_career', referencedColumnName: 'id'})

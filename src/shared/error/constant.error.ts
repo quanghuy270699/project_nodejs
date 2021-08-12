@@ -63,6 +63,14 @@ export const VndErrorType = {
     }
   },
 
+  USER_NEW_PASS_SAME_OLD_PASS: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "USER_NEW_PASS_SAME_OLD_PASS",
+      Message: "Old Password same new password." 
+    }
+  },
+
   USER_OTP_NOT_MATCH: {
     Message: 'error',
     Data:{
@@ -173,6 +181,14 @@ export const VndErrorType = {
   },
 
   FAIL_CREATE_CV: {
+    Message: 'error',
+    Data:{
+      ErrorCode: "FAIL_CREATE_CV",
+      Message: "fail to create cv." 
+    }
+  },
+
+  FAIL_SUBMIT_CV: {
     Message: 'error',
     Data:{
       ErrorCode: "FAIL_CREATE_CV",

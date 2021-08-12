@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, OneToOne, JoinColumn, Index, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, OneToOne, ManyToOne, JoinColumn, Index, PrimaryGeneratedColumn } from "typeorm";
+import { UserProfile } from "../user-account/user.profile.entity";
 import { MDistrict } from "./district.entity";
 import { MProvince } from "./province.entity";
 
@@ -13,29 +14,37 @@ export class MWard extends BaseEntity {
   @Column("int", { name: "ward_id", nullable: true })
   ward_id: number | null;
 
-  @Column("int", { name: "district_id", nullable: true })
+  @Column("int", { select: false, name: "district_id", nullable: true })
   district_id: number | null;
 
-  @Column("int", { name: "province_id", nullable: true })
+  @Column("int", { select: false, name: "province_id", nullable: true })
   province_id: number | null;
 
   @Column("varchar", { name: "ward_name", nullable: true, length: 200 })
   ward_name: string | null;
 
-  @Column("varchar", { name: "ward_type", nullable: true, length: 200 })
+  @Column("varchar", { select: false,  name: "ward_type", nullable: true, length: 200 })
   ward_type: string | null;
 
-  @Column("int", { name: "sorted", nullable: true })
+  @Column("int", { select: false, name: "sorted", nullable: true })
   sorted: number | null;
 
-  @Column("double", { name: "longitude", nullable: true, precision: 22 })
+  @Column("double", { select: false, name: "longitude", nullable: true, precision: 22 })
   longitude: number | null;
 
-  @Column("double", { name: "latitude", nullable: true, precision: 22 })
+  @Column("double", { select: false, name: "latitude", nullable: true, precision: 22 })
   latitude: number | null;
 
-  @Column("varchar", { name: "note", nullable: true, length: 20 })
+  @Column("varchar", { select: false, name: "note", nullable: true, length: 20 })
   note: string | null;
+
+  @ManyToOne(() => MDistrict)
+  @JoinColumn({ name: 'district_id'})
+  district: MDistrict;
+
+  @ManyToOne(type =>UserProfile, userprofile => userprofile.mWard, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'ward_id',referencedColumnName: 'ward_id' })
+  userProfile: UserProfile;
 
   // @OneToOne(type => MDistrict, mdistrict => mdistrict.mWard, { onDelete: 'CASCADE' })
   // @JoinColumn({ name: 'district_id' })

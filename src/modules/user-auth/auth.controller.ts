@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { VndError } from 'src/shared/error/constant.error';
 import { CustomResponse } from '../../interfaces/Response.interface'
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { UserRegisterDto } from './dto/user-register.dto';
+import { UserRegisterDto, UserVeryfyRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto, VerifyOpt } from './dto/user-login.dto';
 import { PasswordOtpDto, GetOtpPasswordDto, 
   FotgotPasswordDto, ChangePasswordDto } from './dto/password.dto';
@@ -52,8 +52,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Verified account otp' })
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
   @ApiBadRequest(VndErrorType.USER_OTP_NOT_MATCH)
-  async verifyotp(@Body() userRegisterDto: UserRegisterDto): Promise<CustomResponse> {    
-    return await this._authService.verifyotp(userRegisterDto, userRegisterDto.otp)
+  async verifyotp(@Body() userveryRegisterDto: UserVeryfyRegisterDto): Promise<CustomResponse> {    
+    return await this._authService.verifyotp(userveryRegisterDto, userveryRegisterDto.otp)
   }
 
   @Post('/forgot/password-otp')

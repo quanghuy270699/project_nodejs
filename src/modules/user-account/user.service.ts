@@ -14,7 +14,8 @@ import { ConfigService } from 'src/config/config.service';
 import { EkycService } from './ekyc.service';
 import { UserProfile } from './user.profile.entity';
 import { UpdateProfileDto } from './dto/user.dto';
-
+import * as QRCode from 'qrcode';
+import { LocationService } from '../location/location.service';
 
 const FormData = require("form-data")
 
@@ -27,7 +28,8 @@ export class UserService {
     private readonly _userRepository: UserRepository,
     private readonly _userProfileRepository: UserProfileRepository,
     private readonly configService: ConfigService,
-    private readonly _ekycService: EkycService
+    private readonly _ekycService: EkycService,
+    private readonly _locationService: LocationService
   ) { 
     this.s3 = new S3({
       region: configService.get(Configuration.AWS_BUCKET_REGION_NAME),
@@ -38,7 +40,7 @@ export class UserService {
     
   }
 
-  async uploadS3(file:any, userid:string, filename: string):Promise<any>{
+  async uploadS3(file:any, userid:number, filename: string):Promise<any>{
     const s3Params = {
       Bucket: this.configService.get(Configuration.BUCKET_NAME),
       Body: file.buffer,
@@ -47,7 +49,7 @@ export class UserService {
     }
     const data = await this.s3.upload(s3Params).promise();
 
-    // console.log('==================================', data)
+    console.log('==================================', data)
     return data
   }
 
@@ -56,6 +58,42 @@ export class UserService {
    * @param {string} id 
    * @returns 
    */
+  async genQrCode(id: number): Promise<any> {
+    // Check ID
+    if (!id) {
+      throw new BadRequestException('id must be sent');
+    }    
+    
+    // Check into DB
+
+    const user: User = await this._userRepository.findOne({where: {id: id}});
+    if (!user) {
+      throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
+    } 
+    console.log('============= start')
+    const qr = await QRCode.toDataURL('2929299292992202');
+    console.log('================', qr)
+    const base64Data = qr.split(',')[1];
+    const filename = [...Array(10)]
+      .map(() => (~~(Math.random() * 36)).toString(36))
+      .join('') + '.jpg';
+
+    console.log('================', filename)
+    const buf = Buffer.from(base64Data, 'base64');
+
+    console.log('============================', buf)
+    const data = await this.uploadS3(buf.toString('base64'), id, filename);
+    await this._userProfileRepository.update(id, {qrcode_url: data.Location})
+    return {
+      StatusCode: 200, 
+      Message: 'Success',
+      Data: {"user_id":id,
+            "qrcode_url": data.Location}
+    }
+      
+    return user;
+  }
+
   async get(id: string): Promise<User> {
     // Check ID
     if (!id) {
@@ -63,16 +101,17 @@ export class UserService {
     }    
     
     // Check into DB
-    const user: User = await this._userRepository.findOne(id);
+    const user: User = await this._userRepository.findOne({where: {id: id}});
     if (!user) {
       throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
     }    
     return user;
   }
 
-  async updateprofile(user_id:string, body: UpdateProfileDto): Promise<any> {
+
+  async updateprofile(user_id:number, body: UpdateProfileDto): Promise<any> {
     try{
-      const user: User = await this._userRepository.findOne(user_id);
+      const user: User = await this._userRepository.findOne({where: {id: user_id}});
       if (!user) {
         throw new HttpException(VndErrorType.USER_NOT_FOUND, 402);
       }
@@ -90,7 +129,7 @@ export class UserService {
     
   }
 
-  async updateprofilepic(file: Express.Multer.File, user_id: string): Promise<any> {
+  async updateprofilepic(file: Express.Multer.File, user_id: number): Promise<any> {
     try {
       const filename = user_id + '.jpg'
       const data = await this.uploadS3(file, user_id, filename);
@@ -98,7 +137,8 @@ export class UserService {
       return {
         StatusCode: 200, 
         Message: 'Success',
-        Data: {"user_id":user_id}
+        Data: {"user_id":user_id,
+              "photo_url": data.Location}
       };
     } catch (error) {
       VndErrorType.USER_UPLOAD_FAIL['Message'] = error.message
@@ -106,84 +146,83 @@ export class UserService {
     }
   }
 
-  async ekycphoto(file:any, upload_type: string, user_id: string): Promise<any> {
-      
-      const userProfile: UserProfile = await this._userProfileRepository.findOne({ where: { id: user_id}});
-      const filetype = '.jpg'
-      const imagename = user_id + '_' + upload_type +  "_" + file.originalname;
-      const Stream = createWriteStream(join('src/assets',`/${imagename}`)).write(file.buffer);
-
-      
-      try {
-
-        const data = await this.uploadS3(file, user_id, imagename);
-        if ("selfie" === upload_type){
-          const type = "5";
-          const token = await this._ekycService.ApiGetTokenAi()
-          var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
-          await this._userProfileRepository.update(user_id, {image_face_url: data.Location});
-          
-          return {
-            StatusCode: 200, 
-            Message: 'Success',
-            Data: {"user_id":user_id}
-          };
-        }
+  async ekycphoto(file:any, upload_type: string, user_id: number): Promise<any> {
+    console.log(file)
     
-        else if ("front_id_card" === upload_type){
-          // console.log('------cccd------', userProfile.cccd)
+    const userProfile: UserProfile = await this._userProfileRepository.findOne({ where: { id: user_id}});
+    const imagename = user_id + '_' + upload_type +  "_" + file.originalname;
+    const Stream = createWriteStream(join('src/assets',`/${imagename}`)).write(file.buffer);
 
+    const type = parseInt(upload_type)
 
-  
-          var type = "0";
-     
-          const token = await this._ekycService.ApiGetTokenAi()
-          var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
-          await this._userProfileRepository.update(user_id, {image_cccd_front_url: data.Location});
-          return {
-            StatusCode: 200, 
-            Message: 'Success',
-            Data: {"user_id":user_id}
-          };
-        }
-    
-        else if ("back_id_card" === upload_type){
-
-          var type = "1";
-          
-          const token = await this._ekycService.ApiGetTokenAi()
-          var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
-          await this._userProfileRepository.update(user_id, {image_cccd_back_url: data.Location});
-          return {
-            StatusCode: 200, 
-            Message: 'Success',
-            Data: {"user_id":user_id}
-          };
-
-        }
+    try {
+      
+      const data = await this.uploadS3(file, user_id, imagename);
+      if (6 === type){
         
-      } catch (error) {
-        VndErrorType.USER_UPLOAD_FAIL['Message'] = error.message
-        throw new HttpException(VndErrorType.USER_UPLOAD_FAIL, HttpStatus.BAD_REQUEST);
+        const token = await this._ekycService.ApiGetTokenAi()
+        console.log('token', token)
+        var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
+        await this._userProfileRepository.update(user_id, {image_face_url: data.Location});
+        
+        return {
+          StatusCode: 200, 
+          Message: 'Success',
+          Data: {"user_id":user_id}
+        };
       }
+  
+      else if (type === 0 || type === 2 || type === 4){
+
+        const token = await this._ekycService.ApiGetTokenAi()
+        var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
+        await this._userProfileRepository.update(user_id, {image_cccd_front_url: data.Location});
+        return {
+          StatusCode: 200, 
+          Message: 'Success',
+          Data: {"user_id":user_id}
+        };
+      }
+  
+      else if (type === 1 || type === 3 || type === 5){
+        
+        const token = await this._ekycService.ApiGetTokenAi()
+        var hash_md5_5 = await this._ekycService.ApiUploadFile(token, user_id, imagename, type)
+        await this._userProfileRepository.update(user_id, {image_cccd_back_url: data.Location});
+        return {
+          StatusCode: 200, 
+          Message: 'Success',
+          Data: {"user_id":user_id}
+        };
+
+      }
+      
+    } catch (error) {
+      VndErrorType.USER_UPLOAD_FAIL['Message'] = error.message
+      throw new HttpException(VndErrorType.USER_UPLOAD_FAIL, HttpStatus.BAD_REQUEST);
+    }
 
   }
-  async checkekyc(user_id: string):Promise<any> {
+  async checkekyc(user_id: number):Promise<any> {
         const token = await this._ekycService.ApiGetTokenAi()
         const userProfile: UserProfile = await this._userProfileRepository.findOne({ where: { id: user_id}});
         return await this._ekycService.ApiEKYC(token, user_id, userProfile, this._userProfileRepository)
 
   }
 
-  async getdata(user_id:string): Promise<any> {
+  async getdata(user_id:number): Promise<any> {
     try{
-      const user: User = await this._userRepository.findOne(user_id);
+      const user: User = await this._userRepository.findOne({where: {id: user_id}});
       if (!user) {
-        throw new HttpException(VndErrorType.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);;
+        throw new HttpException(VndErrorType.USER_NOT_FOUND, HttpStatus.BAD_REQUEST);
       }
-
+      const career = user.Profile.career_id === null ? null : user.Profile.jobCareer;
+      const province = user.Profile.province_id === null ? null : user.Profile.mProvince
+      const district = user.Profile.district_id === null ? null : user.Profile.mDistrict;
+      const ward = user.Profile.ward_id === null ? null : user.Profile.mWard;
 
       if (user.Profile.ekyc === true){
+        
         return { 
           StatusCode: 200, 
           Message: 'Success',
@@ -192,6 +231,13 @@ export class UserService {
                 "full_name": user.Profile.full_name,
                 "birthday": user.Profile.birthday,
                 "address": user.Profile.address,
+                "permanent_address": user.Profile.permanent_address,
+                "email": user.Profile.email,
+                "province": province,
+                "district": district,
+                "ward": ward,
+                "gender": user.Profile.gender,
+                "career":  career,
                 "hometown": user.Profile.hometown,
                 "cccd": user.Profile.cccd,
                 "cccd_date": user.Profile.cccd_date,
@@ -211,6 +257,14 @@ export class UserService {
                 "ekyc": user.Profile.ekyc,
                 "full_name": user.Profile.full_name,
                 "phone_number": user.username,
+                "birthday": user.Profile.birthday,
+                "address": user.Profile.address,
+                "email": user.Profile.email,
+                "province": province,
+                "district": district,
+                "ward": ward,
+                "gender": user.Profile.gender,
+                "career":  career
   
               }
         };
@@ -219,7 +273,8 @@ export class UserService {
       
  
     }
-    catch{
+    catch(error){
+      VndErrorType.FAIL_TO_GET_DATA['Message'] = error.message
       throw new HttpException(VndErrorType.FAIL_TO_GET_DATA, HttpStatus.BAD_REQUEST);
     }
   }

@@ -1,6 +1,9 @@
-import { BaseEntity, Column, JoinColumn,
-  OneToOne, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { JobCareer } from "../cv-job/job.career.entity";
+import { BaseEntity, Column, JoinColumn, OneToMany,
+  OneToOne, Entity, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { JobCareer } from "../cv/career.job.entity";
+import { CvJob } from "../cv/cv.job.entity";
+import { MDistrict } from "../location/district.entity";
+import { MProvince } from "../location/province.entity";
 import { JobCompany } from "./job.company.entity";
 
 @Entity("recruitment", { schema: "cds_db_app" })
@@ -37,8 +40,8 @@ export class RecruitmentEntity extends BaseEntity {
   @Column("int", { name: "career_id", nullable: true })
   career_id: number | null;
 
-  @Column("varchar", { name: "user_id", nullable: true })
-  user_id: string | null;
+  @Column("int", { name: "user_id", nullable: true })
+  user_id: number | null;
 
   @Column({ type: "simple-array", name: "description", nullable: true })
   description: string[] | null;
@@ -46,8 +49,8 @@ export class RecruitmentEntity extends BaseEntity {
   @Column("varchar", { name: "require_degree", nullable: true, length: 1000 })
   require_degree: string | null;
 
-  @Column("varchar", { name: "job_type", nullable: true, length: 50 })
-  job_type: string | null;
+  @Column("int", { name: "job_type", nullable: true})
+  job_type: number | null;
 
   @Column("varchar", { name: "require_amount", nullable: true, length: 50 })
   require_amount: string | null;
@@ -79,21 +82,16 @@ export class RecruitmentEntity extends BaseEntity {
   })
   employee_benefits: string[] | null;
 
-  @Column("varchar", {
+  @Column("int", {
     name: "require_time",
-    nullable: true,
-    comment: "- 0 partime, 1 - fulltime",
-    length: 255,
+    nullable: true
   })
-  require_time: string | null;
+  require_time: number | null;
 
-  @Column("int", { name: "salary_min", nullable: true })
-  salary_min: number | null;
+  @Column("int", { name: "salary", nullable: true })
+  salary: number | null;
 
-  @Column("int", { name: "salary_max", nullable: true })
-  salary_max: number | null;
-
-  @Column("datetime", { name: "expired_date", nullable: true })
+  @Column("varchar", { name: "expired_date", nullable: true })
   expired_date: string | null;
 
   @Column("int", { name: "province_id", nullable: true })
@@ -110,11 +108,23 @@ export class RecruitmentEntity extends BaseEntity {
   @JoinColumn({ name: 'career_id', referencedColumnName: 'id'})
   jobCareer: JobCareer;
 
-  // @OneToOne(type => JobCompany, jobCompany => jobCompany.jobsEntity, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
-  // @JoinColumn({ name: 'job_career', referencedColumnName: 'id'})
-  // JobCompany: JobCompany;
+  @OneToOne(type => MProvince, Mprovince => Mprovince.Recruitment, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'province_id', referencedColumnName: 'province_id'})
+  province?: MProvince
 
-  @OneToOne(type => JobCompany, jobCompany => jobCompany.RecruitmentEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id'})
-  JobCompany: JobCompany
+  @OneToOne(type => MDistrict, mdistrict => mdistrict.Recruitment, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'district_id'})
+  district?: MDistrict
+
+
+  @ManyToOne(type => JobCompany, jobCompany => jobCompany.Recruitment, { cascade: true, nullable: false, eager: true, onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id'})
+  jobCompany: JobCompany
+
+  // @OneToOne(type => JobCompany, jobCompany => jobCompany.Recruitment, { cascade: true, nullable: false, eager: true })
+  // jobComp: JobCompany;
+
+  @OneToMany(type => CvJob, cvjob => cvjob.CVEntity, { onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'id',referencedColumnName: 'job_id' })
+  cvJob: CvJob
 }

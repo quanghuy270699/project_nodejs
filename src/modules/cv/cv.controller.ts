@@ -1,15 +1,11 @@
 import { Controller, ValidationPipe,
     UploadedFile, UsePipes, Post, Get,
      Body, HttpCode, UseGuards, Request, UseInterceptors } from '@nestjs/common';
-import { CustomResponse } from '../../interfaces/Response.interface';
 import { AuthGuard } from '@nestjs/passport';
-import { UserProfileDto } from '../user-auth/dto';
-import { CurrentUser } from '../user-auth/decorators/user.decorator';
-import { IJwtPayload } from '../user-auth/jwt-payload.interface';
 import { GetUser } from '../user-auth/decorators/user.decorator'; 
 import { User } from '../user-account/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { jobCvService } from './job.cv.service';
+import { jobCvService } from './cv.service';
 import { ApiOperation, ApiBody, ApiHeader, ApiQuery,
   ApiParam, ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiResponseBasic } from 'src/shared/swagger/sucess.types';
@@ -17,7 +13,8 @@ import { ApiBadRequest } from 'src/shared/swagger/error.types';
 import { responseSucess } from 'src/shared/swagger/response.types';
 import { VndErrorType } from 'src/shared/error/constant.error';
 import { avatarUploadDto, createCvDto, 
-  updateProfileCvDto, ProfileCVDto } from './dto/job.cv.dto';
+  updateProfileCvDto, ProfileCVDto, createSubmitCvDto } from './dto/cv.dto';
+import { ListJobDto } from '../recruitment/dto/recruitment.dto';
 
 
   @ApiTags('job-cv')
@@ -30,23 +27,36 @@ import { avatarUploadDto, createCvDto,
 
     @Get('/list-cv')
     @ApiBearerAuth('JWT-auth')
+    @HttpCode(200)
     @ApiOperation({ summary: 'Get list CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_CV)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
-    @HttpCode(200)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     async getListCv(
       @GetUser() user: User): Promise<any> {
         return await this._jobcvservice.getListProfileCV(user.id)
     }
+
+    @Get('list-submit-cv')
+    @ApiBearerAuth('JWT-auth')
+    @HttpCode(200)
+    @ApiOperation({ summary: ' List CV đã nộp' })
+    @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_SUBMIT_CV)
+    @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
+    @UsePipes(ValidationPipe)
+    @UseGuards(AuthGuard('jwt'))
+    async listSubmitCV(
+      @GetUser() user: User): Promise<any> {
+        return await this._jobcvservice.listSubmitCV(user.id)
+    }
   
     @Post('/profile-cv')
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'View Profile CV' })
+    @HttpCode(200)
+    @ApiOperation({ summary: 'View chi tiết CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_USER_PROFILE_CV)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
-    @HttpCode(200)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     async getProfileCv(
@@ -56,11 +66,12 @@ import { avatarUploadDto, createCvDto,
     }
 
     @Get('/job-career')
+    @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Get list job career' })
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Get list nghề nghiệp' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_CAREER_DATA)
     @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
-    @HttpCode(200)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     async getJobCareer(
@@ -71,7 +82,8 @@ import { avatarUploadDto, createCvDto,
     @Post('/create-cv')
     @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Create Profle CV' })
+    @HttpCode(200)
+    @ApiOperation({ summary: 'Tạo CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
     @ApiBadRequest(VndErrorType.FAIL_CREATE_CV)
     @UsePipes(ValidationPipe)
@@ -83,13 +95,13 @@ import { avatarUploadDto, createCvDto,
     }
 
     @Post('/upload-avatar')
+    @HttpCode(200)
     @ApiBody({description: 'File', type: avatarUploadDto})
     @ApiBearerAuth('JWT-auth')
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({ summary: 'Upload avatar profile CV' })
+    @ApiOperation({ summary: 'Upload avatar CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_UPLOAD_AVATAR)
     @ApiBadRequest(VndErrorType.USER_UPLOAD_FAIL)
-    @HttpCode(200)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(FileInterceptor('file'))
@@ -102,7 +114,7 @@ import { avatarUploadDto, createCvDto,
     @Post('/update-cv')
     @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Update profile CV' })
+    @ApiOperation({ summary: 'Cập nhật CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_NO_DATA)
     @ApiBadRequest(VndErrorType.FAIL_UPDATE_CV)
     @UsePipes(ValidationPipe)
@@ -114,12 +126,43 @@ import { avatarUploadDto, createCvDto,
         return await this._jobcvservice.updateProfileCV(user.id, body)
     }
 
-    @Post('/delete-cv')
+
+    @Post('/submit-cv')
+    @HttpCode(200)
     @ApiBearerAuth('JWT-auth')
-    @ApiOperation({ summary: 'Delete profile CV' })
+    @ApiOperation({ summary: 'Ứng tuyển CV' })
+    @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DATA)
+    @ApiBadRequest(VndErrorType.FAIL_SUBMIT_CV)
+    @UsePipes(ValidationPipe)
+    @UseGuards(AuthGuard('jwt'))
+    @UseInterceptors(FileInterceptor('file'))
+    async submitCV(
+      @GetUser() user: User,
+      @Body() body: createSubmitCvDto) {
+        return await this._jobcvservice.submitCV(user.id, body)
+    }
+
+    @Post('/list-job')
+    @HttpCode(200)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'List tin tuyển dụng' })
+    @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_LIST_JOB)
+    @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
+    @UsePipes(ValidationPipe)
+    @UseGuards(AuthGuard('jwt'))
+    @UseInterceptors(FileInterceptor('file'))
+    async listJob(
+      @GetUser() user: User,
+      @Body() body: ListJobDto) {
+        return await this._jobcvservice.getListJob(user.id, body)
+    }
+
+    @Post('/delete-cv')
+    @HttpCode(200)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Delete CV' })
     @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_NO_DATA)
     @ApiBadRequest(VndErrorType.FAIL_DELETE_CV)
-    @HttpCode(200)
     @UsePipes(ValidationPipe)
     @UseGuards(AuthGuard('jwt'))
     @UseInterceptors(FileInterceptor('file'))

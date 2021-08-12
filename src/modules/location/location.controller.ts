@@ -16,15 +16,27 @@ export class LocationController {
   }
 
   @Get('/list_provice')
+  @HttpCode(200)
   // @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get list provice' })
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_PROVINCE)
   @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
   async getProvince(): Promise<any> {
-      return await this._locationService.getProvince()
+      return await this._locationService.getListProvince()
   }
+ 
+  // @Post('/postprovice')
+  // @HttpCode(200)
+  // // @ApiBearerAuth('JWT-auth')
+  // @ApiOperation({ summary: 'Get list provice' })
+  // @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_PROVINCE)
+  // @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
+  // async postProvince(): Promise<any> {
+  //     return await this._locationService.getProvince()
+  // }
 
   @Post('/list_district')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Get list district' })
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_DISTRICT)
   @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
@@ -33,6 +45,7 @@ export class LocationController {
   }
 
   @Post('/list_ward')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Get list ward' })
   @ApiResponseBasic(responseSucess.RESPONSE_SUCESS_WARD)
   @ApiBadRequest(VndErrorType.FAIL_TO_GET_DATA)
